@@ -1,0 +1,10 @@
+[project]
+name = "chitthi"
+version = "0.1.0"
+description = "Ask old letters questions; they answer only in their own words. Fully local."
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

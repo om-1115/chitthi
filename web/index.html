@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chitthi</title>
+<style>
+  /* No web fonts on purpose: the app must work with the network off. */
+  :root {
+    --ink: #efe6d2;
+    --ink-dim: #b9ad94;
+    --ink-faint: #8a8070;
+    --paper: #1d1812;
+    --paper-2: #262019;
+    --desk: #110e0a;
+    --line: #3a3127;
+    --wax: #b4432f;
+    --flame: #f2b35a;
+    --ok: #7fb685;
+    --warn: #e0a046;
+    --serif: "Iowan Old Style", "Palatino", "Georgia", serif;
+    --deva: "Kohinoor Devanagari", "Noto Serif Devanagari", "Mangal", serif;
+    --urdu: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Geeza Pro", serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: radial-gradient(1200px 600px at 50% -200px, #2a2117 0%, var(--desk) 60%) fixed, var(--desk);
+    color: var(--ink);
+    font: 17px/1.6 var(--serif);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 16px 80px; }
+  header { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  h1 { font-size: 44px; margin: 0; letter-spacing: .5px; font-weight: 600; }
+  h1 .deva { font-family: var(--deva); color: var(--flame); font-size: 30px; margin-left: 8px; }
+  .tag { color: var(--ink-dim); margin: 0 0 28px; font-style: italic; }
+  .status { margin-left: auto; font: 12px var(--mono); color: var(--ink-faint); }
+  .status b { color: var(--ok); font-weight: 500; }
+
+  .collections { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .col {
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+    padding: 10px 14px; border-radius: 10px; cursor: pointer; text-align: left; font: inherit;
+  }
+  .col small { display: block; color: var(--ink-faint); font-size: 13px; }
+  .col[aria-pressed="true"] { border-color: var(--flame); box-shadow: 0 0 0 1px var(--flame) inset, 0 0 24px -8px var(--flame); }
+
+  form.ask { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  textarea {
+    width: 100%; min-height: 72px; resize: vertical; background: transparent; border: 0; outline: 0;
+    color: var(--ink); font: 20px/1.5 var(--serif);
+  }
+  textarea::placeholder { color: var(--ink-faint); }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .seg button { background: none; border: 0; color: var(--ink-dim); padding: 6px 14px; font: 14px var(--serif); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--paper-2); color: var(--ink); }
+  select { background: var(--paper-2); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font: 14px var(--serif); }
+  .go {
+    margin-left: auto; background: var(--wax); color: #fff6ea; border: 0; border-radius: 999px;
+    padding: 10px 22px; font: 600 15px var(--serif); cursor: pointer; letter-spacing: .3px;
+  }
+  .go:disabled { opacity: .5; cursor: wait; }
+  .hint { color: var(--ink-faint); font-size: 13px; }
+
+  .answer { margin-top: 28px; padding: 26px 28px; border-radius: 4px; position: relative;
+    background: linear-gradient(#2b241b, #241e17); border: 1px solid var(--line);
+    box-shadow: 0 20px 60px -30px #000; font-size: 19px; }
+  .answer.seance { font-style: italic; }
+  .answer .who { font: 13px var(--mono); color: var(--ink-faint); font-style: normal; margin-bottom: 10px; }
+  .answer p { margin: 0 0 12px; white-space: pre-wrap; }
+  .answer mark { background: none; color: var(--flame); border-bottom: 1px dashed var(--flame); }
+  .answer mark.bad { color: var(--warn); border-bottom-color: var(--warn); }
+  .cite { font: 600 12px var(--mono); vertical-align: super; color: var(--flame); background: none; border: 0; cursor: pointer; padding: 0 2px; }
+  .checks { font: 12px var(--mono); color: var(--ink-faint); margin-top: 14px; font-style: normal; }
+  .checks .ok { color: var(--ok); } .checks .bad { color: var(--warn); }
+  .silent { color: var(--ink-dim); }
+
+  .candle { display: inline-block; width: 8px; height: 14px; border-radius: 50% 50% 40% 40%;
+    background: var(--flame); box-shadow: 0 0 16px 4px #f2b35a66; animation: flick 1.2s infinite alternate; margin-right: 10px; vertical-align: -1px; }
+  @keyframes flick { 0% { transform: scale(1, 1); opacity: .9 } 50% { transform: scale(.9, 1.1); opacity: 1 } 100% { transform: scale(1.05, .95); opacity: .8 } }
+  @media (prefers-reduced-motion: reduce) { .candle { animation: none; } }
+
+  h2 { font-size: 15px; font-weight: 500; color: var(--ink-dim); margin: 34px 0 12px; letter-spacing: 1px; text-transform: uppercase; }
+  .passages { display: grid; gap: 14px; }
+  .p { display: grid; grid-template-columns: 1fr; gap: 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px; transition: border-color .3s; }
+  .p.has-img { grid-template-columns: 1fr 120px; }
+  .p.hl { border-color: var(--flame); }
+  .p.uncited { opacity: .6; }
+  .p .meta { font: 12px var(--mono); color: var(--ink-faint); margin-bottom: 8px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .p .meta .n { color: var(--flame); }
+  .p .text { white-space: pre-wrap; max-height: 14em; overflow: auto; }
+  .p .text[lang="hi"] { font-family: var(--deva); line-height: 1.8; }
+  .p .text[lang="ur"] { font-family: var(--urdu); line-height: 2.2; font-size: 18px; }
+  .p img { width: 120px; border-radius: 4px; cursor: zoom-in; filter: sepia(.35) brightness(.9); }
+  .p a { color: var(--ink-dim); }
+  @media (max-width: 640px) { .p, .p.has-img { grid-template-columns: 1fr; } .p img { width: 100%; max-height: 160px; object-fit: cover; object-position: top; } }
+
+  dialog { background: var(--desk); border: 1px solid var(--line); padding: 0; max-width: 92vw; max-height: 92vh; }
+  dialog img { display: block; max-width: 92vw; max-height: 90vh; }
+  dialog::backdrop { background: #000c; }
+  .empty { color: var(--ink-dim); padding: 30px; border: 1px dashed var(--line); border-radius: 12px; margin-top: 20px; }
+  code { font: 14px var(--mono); color: var(--flame); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Chitthi<span class="deva">चिट्ठी</span></h1>
+    <span class="status" id="status">…</span>
+  </header>
+  <p class="tag">Ask the letters. They answer only in their own words, and everything runs on this machine.</p>
+
+  <div class="collections" id="cols"></div>
+
+  <form class="ask" id="form">
+    <textarea id="q" placeholder="What did they write about…" required></textarea>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Voice">
+        <button type="button" data-mode="archivist" aria-pressed="true">Archivist</button>
+        <button type="button" data-mode="seance" aria-pressed="false">Séance</button>
+      </div>
+      <label class="hint">Answer in
+        <select id="lang"><option value="en">English</option><option value="hi">हिन्दी</option><option value="ur">اردو</option></select>
+      </label>
+      <button class="go" id="go">Ask</button>
+    </div>
+  </form>
+
+  <div id="out"></div>
+</div>
+<dialog id="zoom"><img alt="Scanned page"></dialog>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const LANG = { en: "English", hi: "Hindi", ur: "Urdu" };
+const SCRIPT_LANG = { deva: "hi", arab: "ur", latn: "en" };
+let state = { collection: null, mode: "archivist", cols: [] };
+
+async function init() {
+  try {
+    const h = await (await fetch("/api/health")).json();
+    $("#status").innerHTML = `<b>●</b> ${esc(h.chat_model)} · ${esc(h.embed_model)}${h.backend === "fake" ? " (fake)" : ""}`;
+  } catch { $("#status").textContent = "server offline"; }
+  state.cols = await (await fetch("/api/collections")).json();
+  if (!state.cols.length) {
+    $("#out").innerHTML = `<div class="empty">No letters yet. Run <code>python scripts/fetch_archive.py</code> then <code>python -m chitthi.ingest sources sources.toml</code>.</div>`;
+    return;
+  }
+  $("#cols").innerHTML = state.cols.map(c =>
+    `<button class="col" data-slug="${esc(c.slug)}" aria-pressed="false">${esc(c.name)}
+       <small>${esc(c.years || "")} · ${c.docs} doc${c.docs === 1 ? "" : "s"} · ${c.passages} passages</small></button>`).join("");
+  pick(state.cols[0].slug);
+}
+
+function pick(slug) {
+  state.collection = slug;
+  document.querySelectorAll(".col").forEach(b => b.setAttribute("aria-pressed", b.dataset.slug === slug));
+  const c = state.cols.find(c => c.slug === slug);
+  $("#q").placeholder = `What did ${c.name} write about…`;
+}
+
+$("#cols").addEventListener("click", e => { const b = e.target.closest(".col"); if (b) pick(b.dataset.slug); });
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+  state.mode = b.dataset.mode;
+  document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+}));
+$("#q").addEventListener("keydown", e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) $("#form").requestSubmit(); });
+
+$("#form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const question = $("#q").value.trim();
+  if (!question || !state.collection) return;
+  const c = state.cols.find(c => c.slug === state.collection);
+  $("#go").disabled = true;
+  $("#out").innerHTML = `<div class="answer"><span class="candle"></span>${state.mode === "seance" ? `Calling on ${esc(c.name)}…` : "Searching the letters…"}</div>`;
+  try {
+    const r = await fetch("/api/ask", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ collection: state.collection, question, mode: state.mode, lang: $("#lang").value }) });
+    if (!r.ok) throw new Error(await r.text());
+    render(await r.json(), c);
+  } catch (err) {
+    $("#out").innerHTML = `<div class="answer silent">Something went wrong: ${esc(err.message)}. Is Ollama running?</div>`;
+  } finally { $("#go").disabled = false; }
+});
+
+function render(a, c) {
+  let html = esc(a.text);
+  for (const q of a.quotes) {
+    const eq = esc(q.quote);
+    html = html.split(eq).join(`<mark class="${q.verified ? "" : "bad"}" title="${q.verified ? "Found word-for-word in passage " + q.passage : "Not found in the letters"}">${eq}</mark>`);
+  }
+  html = html.replace(/\[(\d{1,2})\]/g, (_, n) => `<button class="cite" data-n="${n}">${n}</button>`);
+  const ok = a.quotes.filter(q => q.verified).length, bad = a.quotes.length - ok;
+  const checks = a.quotes.length
+    ? `<div class="checks"><span class="ok">✓ ${ok} quote${ok === 1 ? "" : "s"} found word-for-word</span>${bad ? ` · <span class="bad">⚠ ${bad} not found in the letters</span>` : ""}</div>` : "";
+  const who = state.mode === "seance" ? `${esc(c.name)}, in their own words` : "The archivist";
+  const cited = new Set(a.cited);
+  $("#out").innerHTML = `
+    <div class="answer ${state.mode} ${a.silent ? "silent" : ""}" dir="auto">
+      <div class="who">${who}</div><p>${html}</p>${checks}
+    </div>
+    ${a.passages.length ? `<h2>From the letters</h2><div class="passages">${a.passages.map(p => `
+      <article class="p ${p.image ? "has-img" : ""} ${cited.size && !cited.has(p.n) ? "uncited" : ""}" id="p${p.n}">
+        <div>
+          <div class="meta"><span class="n">[${p.n}]</span><span>${esc(p.title)}</span><span>p. ${p.page}</span>
+            ${p.year ? `<span>${esc(p.year)}</span>` : ""}<span>${LANG[SCRIPT_LANG[p.script]] || LANG[p.lang] || esc(p.lang)}</span>
+            ${p.source_url ? `<a href="${esc(p.source_url)}" target="_blank" rel="noopener">source</a>` : ""}</div>
+          <div class="text" lang="${SCRIPT_LANG[p.script] || esc(p.lang)}" dir="auto">${esc(p.text)}</div>
+        </div>
+        ${p.image ? `<img src="/pages/${esc(p.image)}" alt="Scan of page ${p.page}" loading="lazy">` : ""}
+      </article>`).join("")}</div>` : ""}`;
+}
+
+$("#out").addEventListener("click", e => {
+  const b = e.target.closest(".cite");
+  if (b) {
+    const el = $("#p" + b.dataset.n);
+    if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("hl"); setTimeout(() => el.classList.remove("hl"), 1600); }
+  }
+  if (e.target.tagName === "IMG") { $("#zoom img").src = e.target.src; $("#zoom").showModal(); }
+});
+$("#zoom").addEventListener("click", () => $("#zoom").close());
+init();
+</script>
+</body>
+</html>

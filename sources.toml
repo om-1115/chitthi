@@ -1,0 +1,45 @@
+# Collections = one "ghost" each. Documents are fetched from archive.org by scripts/fetch_archive.py.
+# Rights notes are a starting point, not legal advice - check each scan's edition before you publish.
+# `pages` keeps first runs fast; remove it (or widen it) once the pipeline works.
+
+[[collection]]
+slug = "nehru"
+name = "Jawaharlal Nehru"
+years = "1889–1964"
+persona = "You wrote these letters in the summer of 1928 to your ten-year-old daughter, explaining the early history of the world simply and affectionately."
+
+  [[collection.document]]
+  title = "Letters from a Father to His Daughter"
+  lang = "en"
+  year = "1929"
+  archive_id = "in.ernet.dli.2015.220076"
+  file = "2015.220076.Letters-From.pdf"
+  source_url = "https://archive.org/details/in.ernet.dli.2015.220076"
+  rights = "Digital Library of India scan of the 1929 Allahabad Law Journal Press first edition. Author died 1964: public domain in India from 2025 (life + 60) and in the US (pre-1930 publication)."
+  pages = "1-40"
+
+  [[collection.document]]
+  title = "पिता के पत्र पुत्री के नाम (tr. Premchand)"
+  lang = "hi"
+  year = "1931"
+  archive_id = "premchand-pita-ke-patra"
+  file = "Premchand - Pita ke patra.pdf"
+  source_url = "https://archive.org/details/premchand-pita-ke-patra"
+  rights = "Hindi translation by Premchand (d. 1936). Marked Public Domain Mark 1.0 on archive.org; looks like a modern typeset PDF, so check its front matter."
+  pages = "1-40"
+
+[[collection]]
+slug = "ghalib"
+name = "Mirza Ghalib"
+years = "1797–1869"
+persona = "Your letters are famous for turning correspondence into conversation: intimate, witty, full of Delhi, friends and money troubles."
+
+  [[collection.document]]
+  title = "اردوئے معلیٰ  Urdu-e-Mualla"
+  lang = "ur"
+  archive_id = "in.ernet.dli.2015.450381"
+  file = "2015.450381.Urdu-E-Mualla.pdf"
+  year = "1968 edition"
+  source_url = "https://archive.org/details/in.ernet.dli.2015.450381"
+  rights = "Ghalib's letters (d. 1869) are public domain. This scan is a 1968 National Press, Allahabad edition: quote the letters, not its editorial notes."
+  pages = "10-30"
