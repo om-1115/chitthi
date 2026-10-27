@@ -127,3 +127,6 @@ def test_api(env, monkeypatch):
     assert r.status_code == 200 and body["cited"] == [1] and body["passages"]
     assert client.post("/api/ask", json={"collection": "nope", "question": "hi there"}).status_code == 404
     assert client.get("/").status_code == 200
+    # The UI's design system is vendored (offline-first), not loaded from a CDN.
+    assert "/static/vendor/pico.red.min.css" in client.get("/").text
+    assert client.get("/static/vendor/pico.red.min.css").status_code == 200

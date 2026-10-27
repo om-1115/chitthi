@@ -1,340 +1,180 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chitthi</title>
+<!-- Pico CSS 2.1.1 (MIT), vendored so the app stays offline. Light theme only. -->
+<link rel="stylesheet" href="/static/vendor/pico.red.min.css">
 <style>
-  /* No web fonts, no CDN: the app must work with the network off. */
   :root {
-    --bg: #efe7d8;
-    --surface: #fbf7ef;
-    --surface-2: #f2eadc;
-    --ink: #2a2118;
-    --ink-dim: #65584a;
-    --ink-faint: #94856f;
-    --line: #e0d3bd;
-    --wax: #a8382a;
-    --wax-ink: #fff7ec;
-    --gold: #9a5b12;
-    --ok: #3b7a4b;
-    --warn: #b0620b;
-    --shadow: 52 36 18;
-    --glow: 0;
-    --serif: ui-serif, "New York", "Iowan Old Style", "Palatino", "Georgia", serif;
-    --deva: "Kohinoor Devanagari", "Noto Serif Devanagari", "Mangal", serif;
+    --deva: "Kohinoor Devanagari", "Noto Sans Devanagari", "Mangal", sans-serif;
     --urdu: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Geeza Pro", serif;
-    --mono: ui-monospace, "SF Mono", Menlo, monospace;
-    --spring: cubic-bezier(.34, 1.56, .64, 1);
+    --ok: var(--pico-ins-color);
+    --bad: var(--pico-del-color);
     --ease: cubic-bezier(.22, .8, .24, 1);
-    color-scheme: light;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-mode="seance"]) {
-      --bg: #15120e; --surface: #1e1914; --surface-2: #28211a;
-      --ink: #efe6d4; --ink-dim: #b8ab93; --ink-faint: #857a68; --line: #3a3127;
-      --wax: #c4513b; --gold: #e9b35f; --ok: #86c093; --warn: #e7a24b; --shadow: 0 0 0;
-      color-scheme: dark;
-    }
-  }
-  /* Séance: the reading room goes dark and candlelit, whatever the system theme. */
-  :root[data-mode="seance"] {
-    --bg: #0c0907; --surface: #17110c; --surface-2: #221910;
-    --ink: #f3e4c8; --ink-dim: #c7b08a; --ink-faint: #8d785b; --line: #3a2a1b;
-    --wax: #c4513b; --gold: #f2b35a; --ok: #8fc79a; --warn: #eda552; --shadow: 0 0 0; --glow: 1;
-    color-scheme: dark;
-  }
+  [lang="hi"] { font-family: var(--deva); }
+  [lang="ur"] { font-family: var(--urdu); line-height: 2.1; }
+  body > header, body > main, body > footer { max-width: 920px; }
 
-  * { box-sizing: border-box; }
-  html, body { margin: 0; }
-  body {
-    background: var(--bg); color: var(--ink);
-    font: 17px/1.6 var(--serif);
-    min-height: 100vh; overflow-x: hidden;
-    transition: background-color .8s var(--ease), color .8s var(--ease);
-  }
-  body::before { /* paper grain */
-    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .5;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  .candlelight { /* fades in for séance */
-    position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: var(--glow); overflow: hidden;
-    transition: opacity 1.2s var(--ease);
-    background:
-      radial-gradient(700px 520px at 50% 18%, #f2b35a22, transparent 70%),
-      radial-gradient(120% 90% at 50% 40%, transparent 55%, #000000b0 100%);
-    animation: breathe 5s ease-in-out infinite alternate;
-  }
-  @keyframes breathe { to { filter: brightness(1.15); } }
-  .ember { position: absolute; bottom: -10px; width: 3px; height: 3px; border-radius: 50%;
-    background: #f6c27a; box-shadow: 0 0 8px 2px #f2b35a88; opacity: 0;
-    animation: rise var(--d) linear var(--delay) infinite; }
-  @keyframes rise {
-    0% { transform: translate(0, 0); opacity: 0; }
-    10% { opacity: .9; }
-    100% { transform: translate(var(--dx), -105vh); opacity: 0; }
-  }
+  /* Header */
+  .brand { display: flex; align-items: baseline; gap: .5rem; font-weight: 700; font-size: 1.15rem; color: var(--pico-h1-color); }
+  .brand span { font-family: var(--deva); color: var(--pico-primary); font-weight: 600; }
+  .status { font-size: .8rem; color: var(--pico-muted-color); display: inline-flex; align-items: center; gap: .45rem; }
+  .status .dot { width: .5rem; height: .5rem; border-radius: 50%; background: var(--ok); }
+  .status .dot.off { background: var(--bad); }
 
-  .wrap { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 22px 16px 80px; }
+  /* Hero */
+  .hero { margin: 1.5rem 0 2rem; }
+  .hero h1 { font-size: clamp(2rem, 4.6vw, 2.9rem); line-height: 1.12; letter-spacing: -.02em; margin-bottom: .6rem; }
+  .hero h1 em { font-style: normal; color: var(--pico-primary); }
+  .hero p { color: var(--pico-muted-color); font-size: 1.08rem; max-width: 38rem; }
 
-  /* top bar */
-  .bar { display: flex; align-items: center; gap: 12px; }
-  .mark { display: flex; align-items: baseline; gap: 10px; font-weight: 600; font-size: 22px; letter-spacing: .2px; }
-  .mark .deva { font-family: var(--deva); color: var(--wax); font-weight: 500; font-size: 18px; transition: color .8s; }
-  .status { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; font: 12px var(--mono);
-    color: var(--ink-faint); border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px;
-    background: color-mix(in srgb, var(--surface) 70%, transparent); transition: border-color .8s, background-color .8s; }
-  .dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); position: relative; }
-  .dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: ping 2.4s var(--ease) infinite; }
-  .dot.off { background: var(--warn); }
-  @keyframes ping { 0% { transform: scale(1); opacity: .7; } 80%, 100% { transform: scale(3); opacity: 0; } }
-
-  /* hero */
-  .hero { position: relative; padding: 64px 0 36px; }
-  .hero h1 { font-size: clamp(40px, 7vw, 76px); line-height: 1.02; margin: 0; font-weight: 600; letter-spacing: -1.5px; max-width: 12ch; }
-  .hero h1 em { font-style: italic; color: var(--wax); font-weight: 500; transition: color .8s; }
-  .hero p { color: var(--ink-dim); font-size: clamp(17px, 2vw, 20px); max-width: 34em; margin: 18px 0 0; transition: color .8s; }
-  .rise { display: inline-block; opacity: 0; transform: translateY(.45em); filter: blur(6px);
-    animation: in .9s var(--ease) forwards; animation-delay: calc(var(--i) * 70ms + 80ms); }
-  @keyframes in { to { opacity: 1; transform: none; filter: none; } }
-  .scribble { display: block; width: min(260px, 60%); height: 18px; margin-top: 10px; color: var(--wax); overflow: visible; }
-  .scribble path { stroke-dasharray: 320; stroke-dashoffset: 320; animation: draw 1.4s .9s var(--ease) forwards; }
-  @keyframes draw { to { stroke-dashoffset: 0; } }
-  .stamp { position: absolute; right: 6px; top: 46px; width: 132px; color: var(--wax); opacity: .8;
-    transform: rotate(9deg); animation: stamp .7s 1.1s var(--spring) both, float 7s 2s ease-in-out infinite; }
-  @keyframes stamp { from { opacity: 0; transform: rotate(20deg) scale(1.6); } }
-  @keyframes float { 50% { transform: rotate(6deg) translateY(-6px); } }
-
-  /* collections: envelopes */
-  .label { font: 12px var(--mono); letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 12px; }
-  .collections { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  /* Collections */
+  .label { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--pico-muted-color); margin-bottom: .5rem; }
+  .collections { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1.5rem; }
   .col {
-    position: relative; overflow: hidden; text-align: left; font: inherit; color: var(--ink); cursor: pointer;
-    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 16px 16px 72px;
-    box-shadow: 0 1px 0 rgb(var(--shadow) / .04), 0 10px 30px -18px rgb(var(--shadow) / .35);
-    transition: transform .45s var(--spring), box-shadow .45s var(--ease), border-color .3s, background-color .8s, color .8s;
-    opacity: 0; animation: in .7s var(--ease) forwards; animation-delay: calc(var(--i) * 80ms + 300ms);
+    display: grid; grid-template-columns: auto 1fr; column-gap: .75rem; align-items: center; text-align: left;
+    width: auto; margin: 0; padding: .7rem 1.1rem .7rem .8rem;
+    background: var(--pico-card-background-color);
+    color: var(--pico-contrast); border: 1px solid var(--pico-muted-border-color); box-shadow: none;
   }
-  .col::before { /* envelope flap */
-    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 26px; pointer-events: none;
-    background: linear-gradient(to bottom right, transparent 49.5%, var(--line) 50%, transparent 51%) left / 50% 100% no-repeat,
-                linear-gradient(to bottom left, transparent 49.5%, var(--line) 50%, transparent 51%) right / 50% 100% no-repeat;
-    opacity: .7; transform-origin: top; transition: transform .5s var(--ease), opacity .5s;
+  .col:hover { border-color: var(--pico-primary-underline); }
+  .col[aria-pressed="true"] { border-color: var(--pico-primary); box-shadow: 0 0 0 .2rem var(--pico-primary-focus); }
+  .col .seal {
+    grid-row: span 2; width: 2.5rem; height: 2.5rem; border-radius: 50%; display: grid; place-items: center;
+    background: var(--pico-primary); color: var(--pico-primary-inverse); font-weight: 700; font-size: .85rem;
   }
-  .col:hover { transform: translateY(-3px) rotate(-.4deg); }
-  .col[aria-pressed="true"] { border-color: var(--wax); transform: translateY(-4px);
-    box-shadow: 0 0 0 1px var(--wax) inset, 0 18px 40px -20px rgb(var(--shadow) / .55), 0 0 calc(var(--glow) * 40px) -10px var(--gold); }
-  .col[aria-pressed="true"]::before { transform: scaleY(-1); opacity: 0; }
-  .col b { display: block; font-size: 18px; font-weight: 600; }
-  .col small { display: block; color: var(--ink-faint); font: 12px/1.5 var(--mono); margin-top: 3px; }
-  .seal {
-    position: absolute; left: 16px; top: 50%; width: 42px; height: 42px; margin-top: -21px; border-radius: 50%;
-    display: grid; place-items: center; font: 600 14px var(--serif); color: var(--wax-ink); letter-spacing: .5px;
-    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--wax) 70%, #fff), var(--wax) 55%, color-mix(in srgb, var(--wax) 70%, #000));
-    box-shadow: 0 2px 6px rgb(0 0 0 / .25), inset 0 0 0 3px color-mix(in srgb, var(--wax) 80%, #000);
-    transition: transform .5s var(--spring);
-  }
-  .col[aria-pressed="true"] .seal { transform: rotate(-14deg) scale(1.08); }
+  .col b { font-size: 1rem; }
+  .col small { color: var(--pico-muted-color); font-size: .78rem; }
 
-  /* composer */
-  form.ask {
-    background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 8px 18px 14px; position: relative;
-    box-shadow: 0 24px 60px -36px rgb(var(--shadow) / .6);
-    transition: border-color .3s, box-shadow .4s, background-color .8s;
-    opacity: 0; animation: in .8s .5s var(--ease) forwards;
+  /* Ask form */
+  form.ask { margin-bottom: 2rem; }
+  form.ask textarea { min-height: 5.5rem; resize: vertical; margin-bottom: .75rem; font-size: 1.05rem; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+  .row [role="group"] { width: auto; margin: 0; }
+  .row [role="group"] button { padding: .45rem .95rem; font-size: .9rem; }
+  .row [role="group"] button:not([aria-current="true"]) {
+    --pico-background-color: var(--pico-card-background-color); --pico-color: var(--pico-muted-color);
+    --pico-border-color: var(--pico-form-element-border-color);
   }
-  form.ask:focus-within { border-color: color-mix(in srgb, var(--wax) 55%, var(--line)); box-shadow: 0 24px 60px -30px rgb(var(--shadow) / .7), 0 0 0 4px color-mix(in srgb, var(--wax) 14%, transparent); }
-  textarea {
-    width: 100%; min-height: 104px; resize: vertical; border: 0; outline: 0; padding: 10px 0 0;
-    color: var(--ink); font: 21px/36px var(--serif);
-    background: repeating-linear-gradient(to bottom, transparent 0 35px, color-mix(in srgb, var(--line) 80%, transparent) 35px 36px) 0 10px / 100% 100% local;
+  .row .spacer { flex: 1; }
+  .row kbd { font-size: .7rem; }
+  #go { width: auto; margin: 0; padding: .55rem 1.4rem; }
+
+  /* Answer */
+  #out:empty { display: none; }
+  article.answer > header { font-size: .78rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--pico-muted-color); }
+  article.answer p { font-size: 1.12rem; line-height: 1.75; margin: 0; white-space: pre-line; }
+  article.answer.seance p { font-family: Georgia, "Iowan Old Style", serif; font-style: italic; }
+  article.answer.seance p[lang="hi"] { font-family: var(--deva); font-style: normal; }
+  article.answer.seance { border-left: .25rem solid var(--pico-primary); }
+  article.answer mark { padding: 0 .15em; border-radius: .2rem; }
+  article.answer mark.bad { --pico-mark-background-color: rgba(197, 47, 33, .12); text-decoration: line-through wavy var(--bad); }
+  article.answer > footer { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .badge { font-size: .8rem; font-weight: 600; padding: .2rem .65rem; border-radius: 1rem; }
+  .badge.ok { color: var(--ok); background: rgba(28, 105, 84, .1); }
+  .badge.bad { color: var(--bad); background: rgba(136, 56, 53, .1); }
+  .cite {
+    display: inline-grid; place-items: center; min-width: 1.35rem; height: 1.35rem; margin: 0 .1rem; padding: 0 .3rem;
+    font: 600 .72rem/1 var(--pico-font-family-sans-serif); font-style: normal; vertical-align: .35em;
+    border-radius: .7rem; border: 0; background: var(--pico-primary); color: var(--pico-primary-inverse); cursor: pointer;
   }
-  textarea::placeholder { color: var(--ink-faint); font-style: italic; }
-  textarea:focus-visible { outline: none; } /* the form's focus-within glow shows focus */
-  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; padding-top: 10px; }
-  .seg { position: relative; display: inline-flex; padding: 3px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); transition: background-color .8s, border-color .8s; }
-  .seg .thumb { position: absolute; top: 3px; bottom: 3px; left: 0; width: var(--w, 0); transform: translateX(var(--x, 0));
-    border-radius: 999px; background: var(--surface); box-shadow: 0 1px 3px rgb(0 0 0 / .18);
-    transition: transform .45s var(--spring), width .45s var(--spring), background-color .8s; }
-  .seg button { position: relative; z-index: 1; background: none; border: 0; color: var(--ink-dim); padding: 6px 14px;
-    font: 14px var(--serif); cursor: pointer; border-radius: 999px; transition: color .3s; }
-  .seg button[aria-pressed="true"] { color: var(--ink); }
-  .seg button[data-lang="hi"] { font-family: var(--deva); }
-  .seg button[data-lang="ur"] { font-family: var(--urdu); }
-  .kbd { font: 12px var(--mono); color: var(--ink-faint); margin-left: auto; }
-  .go {
-    display: inline-flex; align-items: center; gap: 8px; background: var(--wax); color: var(--wax-ink); border: 0; border-radius: 999px;
-    padding: 11px 20px 11px 22px; font: 600 15px var(--serif); cursor: pointer; letter-spacing: .3px;
-    box-shadow: 0 8px 20px -10px var(--wax); transition: transform .3s var(--spring), box-shadow .3s, background-color .8s;
-  }
-  .go svg { transition: transform .35s var(--spring); }
-  .go:hover { transform: translateY(-1px); } .go:hover svg { transform: translateX(3px) rotate(-8deg); }
-  .go:active { transform: scale(.96); }
-  .go:disabled { opacity: .6; cursor: wait; transform: none; }
-  :focus-visible { outline: 2px solid var(--wax); outline-offset: 2px; }
+  .cite:hover { background: var(--pico-primary-hover); }
+  article.silent { text-align: center; color: var(--pico-muted-color); }
+  article.error { border-left: .25rem solid var(--bad); }
 
-  /* loading */
-  .waiting { margin-top: 28px; padding: 26px 28px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line);
-    display: flex; align-items: center; gap: 16px; color: var(--ink-dim); animation: in .5s var(--ease) both; }
-  .ink { display: inline-flex; gap: 6px; }
-  .ink i { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); animation: blot 1.1s ease-in-out infinite; }
-  .ink i:nth-child(2) { animation-delay: .15s; } .ink i:nth-child(3) { animation-delay: .3s; }
-  @keyframes blot { 0%, 100% { transform: scale(.4); opacity: .3; } 40% { transform: scale(1); opacity: .9; } }
-  .flame { width: 22px; height: 40px; flex: none; }
-  .flame .f { transform-origin: 11px 30px; animation: flick 1.1s ease-in-out infinite alternate; }
-  .flame .halo { animation: halo 1.6s ease-in-out infinite alternate; }
-  @keyframes flick { 0% { transform: scale(1, 1) skewX(0); } 35% { transform: scale(.92, 1.08) skewX(-3deg); } 70% { transform: scale(1.04, .95) skewX(2deg); } 100% { transform: scale(.97, 1.04) skewX(-1deg); } }
-  @keyframes halo { to { opacity: .45; transform: scale(1.15); } }
-  .lines { flex: 1; display: grid; gap: 9px; }
-  .lines span { height: 10px; border-radius: 6px; background: linear-gradient(90deg, var(--surface-2) 0 30%, color-mix(in srgb, var(--surface-2) 40%, var(--line)) 50%, var(--surface-2) 70%) 0 0 / 300% 100%;
-    animation: shimmer 1.6s linear infinite; }
-  .lines span:nth-child(2) { width: 86%; } .lines span:nth-child(3) { width: 62%; }
-  @keyframes shimmer { to { background-position: -150% 0; } }
+  /* Ink-in: words fade up one after another. */
+  .w { opacity: 0; display: inline-block; animation: ink .5s var(--ease) forwards; animation-delay: calc(var(--i) * 16ms); }
+  @keyframes ink { from { opacity: 0; translate: 0 .35em; filter: blur(2px); } to { opacity: 1; translate: 0 0; filter: none; } }
 
-  /* answer: a letter */
-  .answer { margin-top: 28px; padding: 30px 32px 24px; border-radius: 6px 6px 18px 18px; position: relative; font-size: 20px; line-height: 1.7;
-    background: var(--surface); border: 1px solid var(--line);
-    box-shadow: 0 30px 70px -40px rgb(var(--shadow) / .7), 0 0 calc(var(--glow) * 60px) -30px var(--gold);
-    animation: unfold .7s var(--ease) both; transform-origin: top; transition: background-color .8s, border-color .8s; }
-  .answer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; border-radius: 6px 6px 0 0;
-    background: repeating-linear-gradient(90deg, var(--wax) 0 14px, transparent 14px 20px, #2f5d8a 20px 34px, transparent 34px 40px); opacity: .75; }
-  @keyframes unfold { from { opacity: 0; transform: perspective(900px) rotateX(-14deg) translateY(-10px); } }
-  .answer.seance p { font-style: italic; font-synthesis: none; } /* no fake slant on Devanagari/Nastaliq */
-  .who { font: 12px var(--mono); color: var(--ink-faint); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-  .answer p { margin: 0 0 12px; white-space: pre-wrap; }
-  .answer p:lang(hi) { font-family: var(--deva); line-height: 1.9; }
-  .answer p:lang(ur) { font-family: var(--urdu); line-height: 2.3; }
-  .w { opacity: 0; filter: blur(4px); animation: ink .55s var(--ease) forwards; animation-delay: calc(var(--i) * 16ms); }
-  @keyframes ink { from { opacity: 0; filter: blur(4px); transform: translateY(2px); } to { opacity: 1; filter: none; transform: none; } }
-  .answer mark { background: linear-gradient(var(--gold), var(--gold)) 0 100% / 0 2px no-repeat; color: var(--gold); padding-bottom: 1px;
-    animation: underline .7s var(--ease) forwards; animation-delay: var(--done, 0ms); }
-  .answer mark.bad { color: var(--warn); background-image: none; text-decoration: underline wavy var(--warn); text-underline-offset: 4px; }
-  @keyframes underline { to { background-size: 100% 2px; } }
-  .cite { font: 600 11px var(--mono); vertical-align: super; color: var(--wax-ink); background: var(--wax); border: 0; cursor: pointer;
-    padding: 1px 5px; border-radius: 6px; margin: 0 1px; transition: transform .25s var(--spring); }
-  .cite:hover { transform: translateY(-2px) scale(1.12); }
-  .cite.w { filter: none; }
-  .checks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-  .badge { font: 12px var(--mono); padding: 4px 10px; border-radius: 999px; border: 1px solid; opacity: 0; transform: scale(.8);
-    animation: pop .5s var(--spring) forwards; animation-delay: var(--done, 0ms); }
-  .badge.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); background: color-mix(in srgb, var(--ok) 9%, transparent); }
-  .badge.bad { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: color-mix(in srgb, var(--warn) 9%, transparent); }
-  @keyframes pop { to { opacity: 1; transform: none; } }
-  .answer.silent { color: var(--ink-dim); text-align: center; padding: 40px 28px; }
-  .answer.silent .who { justify-content: center; }
-  .answer.silent svg { color: var(--ink-faint); margin-bottom: 6px; }
-  .answer.error { border-color: color-mix(in srgb, var(--warn) 50%, var(--line)); color: var(--ink-dim); }
-
-  /* passages */
-  .ph { display: flex; align-items: baseline; gap: 10px; margin: 40px 0 14px; }
-  .ph h2 { font-size: 26px; font-weight: 600; margin: 0; letter-spacing: -.3px; }
-  .ph span { font: 12px var(--mono); color: var(--ink-faint); }
-  .passages { display: grid; gap: 14px; }
-  .p { display: grid; grid-template-columns: 1fr; gap: 20px; background: var(--surface); border: 1px solid var(--line);
-    border-radius: 14px; padding: 18px 20px; position: relative;
-    opacity: 0; animation: in .6s var(--ease) forwards; animation-delay: calc(var(--done, 0ms) + var(--i) * 70ms);
-    transition: border-color .3s, opacity .3s, background-color .8s; }
-  .p.has-img { grid-template-columns: 1fr 132px; }
-  .p.uncited { --dim: .62; }
-  .p.uncited > div { opacity: var(--dim); transition: opacity .3s; }
-  .p.uncited:hover > div { opacity: 1; }
-  .p.hl { animation: in .01s forwards, ring 1.4s var(--ease); border-color: var(--wax); }
-  @keyframes ring { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--wax) 55%, transparent); } 100% { box-shadow: 0 0 0 16px transparent; } }
-  .meta { font: 12px var(--mono); color: var(--ink-faint); margin-bottom: 10px; display: flex; gap: 6px 12px; flex-wrap: wrap; align-items: center; }
-  .meta .n { color: var(--wax-ink); background: var(--wax); border-radius: 6px; padding: 1px 6px; font-weight: 600; }
-  .meta .tl { color: var(--ink-dim); }
-  .meta .lang { border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; }
-  .meta a { color: var(--ink-dim); text-decoration-color: var(--line); text-underline-offset: 3px; }
-  .text { white-space: pre-wrap; max-height: 9.6em; overflow: hidden; position: relative; transition: max-height .6s var(--ease);
+  /* Passages */
+  .ph { display: flex; align-items: baseline; gap: .75rem; margin: 2.25rem 0 1rem; }
+  .ph h2 { margin: 0; font-size: 1.35rem; }
+  .ph span { color: var(--pico-muted-color); font-size: .85rem; }
+  article.p { display: grid; grid-template-columns: 1fr auto; gap: 1.25rem; align-items: start;
+    opacity: 0; animation: up .5s var(--ease) forwards; animation-delay: calc(var(--done, 0ms) + var(--i) * 70ms); }
+  @keyframes up { from { opacity: 0; translate: 0 .75rem; } to { opacity: 1; translate: 0 0; } }
+  article.p.uncited { --pico-card-background-color: var(--pico-card-sectioning-background-color); box-shadow: none; border: 1px solid var(--pico-muted-border-color); }
+  article.p.hl { animation: hl 1.6s var(--ease); opacity: 1; }
+  @keyframes hl { 0%, 40% { box-shadow: 0 0 0 .25rem var(--pico-primary-focus); } 100% { box-shadow: var(--pico-card-box-shadow); } }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem; font-size: .8rem; color: var(--pico-muted-color); margin-bottom: .5rem; }
+  .meta .n { display: inline-grid; place-items: center; min-width: 1.35rem; height: 1.35rem; border-radius: .7rem; background: var(--pico-primary); color: #fff; font-weight: 600; font-size: .72rem; }
+  .meta .tl { color: var(--pico-color); font-weight: 600; }
+  .meta .lang { border: 1px solid var(--pico-muted-border-color); border-radius: 1rem; padding: 0 .5rem; }
+  .p .text { max-height: 9.5em; overflow: hidden; line-height: 1.65; white-space: pre-line;
     -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
-  .text.open { max-height: 80em; -webkit-mask-image: none; mask-image: none; }
-  .text:lang(hi) { font-family: var(--deva); line-height: 1.85; }
-  .text:lang(ur) { font-family: var(--urdu); line-height: 2.3; font-size: 18px; }
-  .more { margin-top: 6px; background: none; border: 0; padding: 0; color: var(--wax); font: 13px var(--mono); cursor: pointer; }
-  .scan { align-self: start; border: 0; padding: 6px 6px 18px; background: #fffdf8; cursor: zoom-in; border-radius: 3px;
-    box-shadow: 0 10px 24px -12px rgb(0 0 0 / .45), 0 1px 2px rgb(0 0 0 / .15);
-    transform: rotate(var(--r, 2deg)); transition: transform .5s var(--spring), box-shadow .4s; }
-  .scan:hover { transform: rotate(0) translateY(-4px) scale(1.04); box-shadow: 0 20px 34px -14px rgb(0 0 0 / .5); }
-  .scan img { display: block; width: 120px; border-radius: 1px; filter: sepia(.25); }
+  .p .text.open { max-height: none; -webkit-mask-image: none; mask-image: none; }
+  .more { width: auto; margin: .5rem 0 0; padding: .25rem .7rem; font-size: .8rem; }
+  .scan { width: 6.5rem; margin: 0; padding: .3rem; background: #fff; border: 1px solid var(--pico-muted-border-color);
+    box-shadow: var(--pico-box-shadow); transition: transform .2s var(--ease); }
+  .scan:hover { transform: translateY(-2px) rotate(-1deg); }
+  .scan img { display: block; width: 100%; }
+
+  /* Scan zoom */
+  dialog#zoom article { padding: .5rem; max-width: min(92vw, 760px); }
+  dialog#zoom img { display: block; max-height: 86vh; width: auto; margin: auto; animation: pop .35s var(--ease); }
+  @keyframes pop { from { opacity: 0; scale: .94; } to { opacity: 1; scale: 1; } }
+
+  .empty { color: var(--pico-muted-color); }
+  body > footer { font-size: .8rem; color: var(--pico-muted-color); display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
+
   @media (max-width: 640px) {
-    .status { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .hero { padding-top: 40px; } .stamp { width: 84px; top: 24px; right: 0; opacity: .5; }
-    .p, .p.has-img { grid-template-columns: 1fr; }
-    .scan { justify-self: start; } .scan img { width: 100%; max-width: 280px; max-height: 180px; object-fit: cover; object-position: top; }
-    .answer { padding: 24px 20px 20px; font-size: 18px; }
-    .kbd { display: none; } .go { margin-left: auto; }
+    .row kbd { display: none; }
+    article.p { grid-template-columns: 1fr; }
+    .scan { width: 5rem; }
   }
-
-  dialog { background: transparent; border: 0; padding: 0; max-width: 94vw; max-height: 94vh; overflow: visible; }
-  dialog img { display: block; max-width: 94vw; max-height: 92vh; border-radius: 4px; box-shadow: 0 40px 100px -20px #000; background: #fff; cursor: zoom-out; }
-  dialog[open] img { animation: zoomin .45s var(--spring); }
-  dialog::backdrop { background: rgb(10 8 6 / .82); backdrop-filter: blur(6px); animation: fade .3s ease; }
-  @keyframes zoomin { from { opacity: 0; transform: scale(.85); } }
-  @keyframes fade { from { opacity: 0; } }
-  ::view-transition-group(scan) { animation-duration: .5s; animation-timing-function: var(--ease); }
-
-  .empty { color: var(--ink-dim); padding: 30px; border: 1px dashed var(--line); border-radius: 16px; margin-top: 10px; background: color-mix(in srgb, var(--surface) 60%, transparent); }
-  code { font: 14px var(--mono); color: var(--wax); }
-  footer { margin-top: 64px; display: flex; gap: 8px 18px; flex-wrap: wrap; font: 12px var(--mono); color: var(--ink-faint); }
-
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-    .ember { display: none; }
+    .w, article.p, dialog#zoom img { animation: none; opacity: 1; }
   }
 </style>
 </head>
 <body>
-<div class="candlelight" id="candle" aria-hidden="true"></div>
-<div class="wrap">
-  <div class="bar">
-    <div class="mark">Chitthi<span class="deva">चिट्ठी</span></div>
-    <span class="status" id="status"><span class="dot"></span>connecting…</span>
-  </div>
+<header class="container">
+  <nav>
+    <ul><li><span class="brand">Chitthi <span>चिट्ठी</span></span></li></ul>
+    <ul><li><span class="status" id="status"><span class="dot"></span>connecting…</span></li></ul>
+  </nav>
+</header>
 
+<main class="container">
   <section class="hero">
     <h1 id="headline">Ask the letters. They <em>answer</em> in their own words.</h1>
-    <svg class="scribble" viewBox="0 0 260 18" aria-hidden="true"><path d="M2 12 C 40 2, 70 18, 110 9 S 180 4, 210 11 S 248 8, 258 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-    <p class="rise" style="--i:10">Every quote is checked word-for-word against the scanned page it came from. Nothing leaves this machine.</p>
-    <svg class="stamp" viewBox="0 0 120 120" aria-hidden="true">
-      <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3"/>
-      <circle cx="60" cy="60" r="40" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <path id="arc" d="M60 60 m-46 0 a46 46 0 1 1 92 0" fill="none"/>
-      <text font-family="ui-monospace, Menlo, monospace" font-size="9.5" letter-spacing="2.4" fill="currentColor"><textPath href="#arc" startOffset="50%" text-anchor="middle">LOCAL · OFFLINE · GEMMA</textPath></text>
-      <text x="60" y="66" text-anchor="middle" font-family="Kohinoor Devanagari, serif" font-size="20" fill="currentColor">डाक</text>
-      <path d="M22 84 q19 -8 38 0 t38 0 M22 92 q19 -8 38 0 t38 0" fill="none" stroke="currentColor" stroke-width="1.6"/>
-    </svg>
+    <p>Every quote is checked word-for-word against the scanned page it came from. Nothing leaves this machine.</p>
   </section>
 
-  <p class="label">Whose letters</p>
+  <div class="label">Whose letters</div>
   <div class="collections" id="cols"></div>
 
   <form class="ask" id="form">
-    <label for="q" class="label" style="display:block;margin:10px 0 0">Your question</label>
+    <label for="q" class="label">Your question</label>
     <textarea id="q" placeholder="What did they write about…" required></textarea>
     <div class="row">
-      <div class="seg" id="modes" role="group" aria-label="Voice">
-        <span class="thumb"></span>
-        <button type="button" data-mode="archivist" aria-pressed="true">Archivist</button>
-        <button type="button" data-mode="seance" aria-pressed="false">Séance</button>
+      <div role="group" id="modes" aria-label="Voice">
+        <button type="button" data-mode="archivist" aria-current="true">Archivist</button>
+        <button type="button" data-mode="seance" aria-current="false">Séance</button>
       </div>
-      <div class="seg" id="langs" role="group" aria-label="Answer in">
-        <span class="thumb"></span>
-        <button type="button" data-lang="en" aria-pressed="true">English</button>
-        <button type="button" data-lang="hi" aria-pressed="false">हिन्दी</button>
-        <button type="button" data-lang="ur" aria-pressed="false">اردو</button>
+      <div role="group" id="langs" aria-label="Answer in">
+        <button type="button" data-lang="en" aria-current="true">English</button>
+        <button type="button" data-lang="hi" aria-current="false" lang="hi">हिन्दी</button>
+        <button type="button" data-lang="ur" aria-current="false" lang="ur">اردو</button>
       </div>
-      <span class="kbd">⌘ ↵</span>
-      <button class="go" id="go">Ask
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
+      <span class="spacer"></span>
+      <kbd>⌘ ↵</kbd>
+      <button type="submit" id="go">Ask →</button>
     </div>
   </form>
 
   <div id="out" aria-live="polite"></div>
+</main>
 
-  <footer><span>Gemma via Ollama, on this machine</span><span>Citations point to the original scan</span></footer>
-</div>
-<dialog id="zoom"><img alt="Scanned page"></dialog>
+<footer class="container">
+  <span>Gemma via Ollama, on this machine</span>
+  <span>Citations point to the original scan</span>
+</footer>
+
+<dialog id="zoom"><article><img alt="Scanned page"></article></dialog>
 
 <script>
 const $ = (s, el = document) => el.querySelector(s);
@@ -345,71 +185,31 @@ const SCRIPT_LANG = { deva: "hi", arab: "ur", latn: "en" };
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let state = { collection: null, mode: "archivist", lang: "en", cols: [] };
 
-// Headline: each word rises in.
-(() => {
-  let i = 0;
-  const wrap = node => {
-    for (const n of [...node.childNodes]) {
-      if (n.nodeType === 3) {
-        const frag = document.createDocumentFragment();
-        for (const part of n.textContent.split(/(\s+)/)) {
-          if (!part) continue;
-          if (/^\s+$/.test(part)) { frag.append(part); continue; }
-          const s = document.createElement("span"); s.className = "rise"; s.style.setProperty("--i", i++); s.textContent = part; frag.append(s);
-        }
-        n.replaceWith(frag);
-      } else wrap(n);
-    }
-  };
-  wrap($("#headline"));
-})();
-
-// Embers for séance mode.
-for (let i = 0; i < 18; i++) {
-  const e = document.createElement("span");
-  e.className = "ember";
-  e.style.cssText = `left:${Math.random() * 100}%;--d:${7 + Math.random() * 8}s;--delay:${-Math.random() * 12}s;--dx:${(Math.random() - .5) * 160}px`;
-  $("#candle").append(e);
-}
-
-function slide(seg) {
-  const on = $("button[aria-pressed='true']", seg), t = $(".thumb", seg);
-  if (!on) return;
-  t.style.setProperty("--x", on.offsetLeft + "px");
-  t.style.setProperty("--w", on.offsetWidth + "px");
-}
-function segment(seg, key, onPick) {
-  seg.addEventListener("click", e => {
+// Pico styles a pressed button inside role="group" through aria-current.
+function segment(group, key, onPick) {
+  group.addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
-    $$("button", seg).forEach(x => x.setAttribute("aria-pressed", x === b));
-    slide(seg); onPick(b.dataset[key]);
+    $$("button", group).forEach(x => x.setAttribute("aria-current", x === b));
+    onPick(b.dataset[key]);
   });
 }
-segment($("#modes"), "mode", m => {
-  state.mode = m;
-  const go = () => document.documentElement.dataset.mode = m;
-  document.startViewTransition && !calm ? document.startViewTransition(go) : go();
-  placeholder();
-});
+segment($("#modes"), "mode", m => { state.mode = m; placeholder(); });
 segment($("#langs"), "lang", l => state.lang = l);
-addEventListener("resize", () => $$(".seg").forEach(slide));
-document.fonts?.ready.then(() => $$(".seg").forEach(slide));
 
 const initials = name => { const w = name.split(/\s+/).filter(Boolean); return (w[0][0] + (w.length > 1 ? w.at(-1)[0] : "")).toUpperCase(); };
 
 async function init() {
-  $$(".seg").forEach(slide);
   try {
     const h = await (await fetch("/api/health")).json();
     $("#status").innerHTML = `<span class="dot"></span>${esc(h.chat_model)} · ${esc(h.embed_model)}${h.backend === "fake" ? " · fake" : ""}`;
   } catch { $("#status").innerHTML = `<span class="dot off"></span>server offline`; }
   try { state.cols = await (await fetch("/api/collections")).json(); } catch { state.cols = []; }
   if (!state.cols.length) {
-    $("#out").innerHTML = `<div class="empty">No letters yet. Run <code>python scripts/fetch_archive.py</code> then <code>python -m chitthi.ingest sources sources.toml</code>.</div>`;
+    $("#out").innerHTML = `<article class="empty">No letters yet. Run <code>python scripts/fetch_archive.py</code> then <code>python -m chitthi.ingest sources sources.toml</code>.</article>`;
     return;
   }
-  $("#cols").innerHTML = state.cols.map((c, i) =>
-    `<button class="col" data-slug="${esc(c.slug)}" aria-pressed="false" style="--i:${i}">
+  $("#cols").innerHTML = state.cols.map(c =>
+    `<button type="button" class="col" data-slug="${esc(c.slug)}" aria-pressed="false">
        <span class="seal" aria-hidden="true">${esc(initials(c.name))}</span>
        <b>${esc(c.name)}</b>
        <small>${esc(c.years || "")}${c.years ? " · " : ""}${c.docs} doc${c.docs === 1 ? "" : "s"} · ${c.passages} passages</small></button>`).join("");
@@ -430,21 +230,14 @@ function pick(slug) {
 $("#cols").addEventListener("click", e => { const b = e.target.closest(".col"); if (b) pick(b.dataset.slug); });
 $("#q").addEventListener("keydown", e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) $("#form").requestSubmit(); });
 
-const FLAME = `<svg class="flame" viewBox="0 0 22 40" aria-hidden="true">
-  <circle class="halo" cx="11" cy="16" r="10" fill="#f2b35a" opacity=".25"/>
-  <path class="f" d="M11 2 C 15 10, 18 15, 18 21 A7 7 0 0 1 4 21 C 4 15, 8 11, 11 2 Z" fill="#f2b35a"/>
-  <path class="f" d="M11 12 C 13 16, 14 18, 14 21 A3 3 0 0 1 8 21 C 8 18, 10 16, 11 12 Z" fill="#fff1d0"/>
-  <rect x="10" y="28" width="2" height="4" fill="#3a2a1b"/><rect x="5" y="32" width="12" height="8" rx="1.5" fill="#e9dcc4"/></svg>`;
-
 $("#form").addEventListener("submit", async e => {
   e.preventDefault();
   const question = $("#q").value.trim();
   if (!question || !state.collection) return;
   const c = state.cols.find(c => c.slug === state.collection);
+  $("#go").setAttribute("aria-busy", "true");
   $("#go").disabled = true;
-  $("#out").innerHTML = state.mode === "seance"
-    ? `<div class="waiting">${FLAME}<span>Calling on ${esc(c.name)}…</span></div>`
-    : `<div class="waiting"><span class="ink"><i></i><i></i><i></i></span><div class="lines"><span></span><span></span><span></span></div></div>`;
+  $("#out").innerHTML = `<article aria-busy="true">${state.mode === "seance" ? `Calling on ${esc(c.name)}…` : "Reading the letters…"}</article>`;
   $("#out").scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" });
   try {
     const r = await fetch("/api/ask", { method: "POST", headers: { "content-type": "application/json" },
@@ -452,18 +245,19 @@ $("#form").addEventListener("submit", async e => {
     if (!r.ok) throw new Error(await r.text());
     render(await r.json(), c);
   } catch (err) {
-    $("#out").innerHTML = `<div class="answer error"><div class="who">Something went wrong</div><p>${esc(err.message)}</p><p>Is Ollama running?</p></div>`;
-  } finally { $("#go").disabled = false; }
+    $("#out").innerHTML = `<article class="error"><header>Something went wrong</header><p>${esc(err.message)}</p><p>Is Ollama running?</p></article>`;
+  } finally { $("#go").disabled = false; $("#go").removeAttribute("aria-busy"); }
 });
 
-// Wrap every word in a span so the answer appears like ink spreading; returns when it finishes (ms).
+// Wrap every word in a span so the answer appears word by word; returns when it finishes (ms).
 function inkIn(root) {
+  if (calm) return 0;
   let i = 0;
   const walk = node => {
     for (const n of [...node.childNodes]) {
       if (n.nodeType === 1) {
-        if (n.classList.contains("cite")) { n.classList.add("w"); n.style.setProperty("--i", i++); }
-        else { if (n.tagName === "MARK") n.style.setProperty("--done", `${i * 16 + 400}ms`); walk(n); }
+        if (n.classList.contains("cite")) { n.classList.add("w"); n.style.setProperty("--i", Math.min(i++, 110)); }
+        else walk(n);
         continue;
       }
       if (n.nodeType !== 3) continue;
@@ -476,15 +270,16 @@ function inkIn(root) {
       n.replaceWith(frag);
     }
   };
-  if (!calm) walk(root);
-  return calm ? 0 : Math.min(i, 110) * 16 + 450;
+  walk(root);
+  return Math.min(i, 110) * 16 + 500;
 }
 
+const citeChip = n => `<button type="button" class="cite" data-n="${n}" aria-label="Go to passage ${n}">${n}</button>`;
+
 function render(a, c) {
-  const who = state.mode === "seance" ? `${esc(c.name)}, in their own words` : "The archivist";
+  const who = state.mode === "seance" ? `✦ ${esc(c.name)}, in their own words` : "✎ The archivist";
   if (a.silent) {
-    $("#out").innerHTML = `<div class="answer silent"><svg width="46" height="34" viewBox="0 0 46 34" aria-hidden="true"><rect x="1.5" y="1.5" width="43" height="31" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2 3 23 19 44 3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-      <div class="who">${who}</div><p>${esc(a.text)}</p></div>${passagesHtml(a, 0)}`;
+    $("#out").innerHTML = `<article class="answer silent"><header>${who}</header><p>${esc(a.text)}</p></article>${passagesHtml(a, 0)}`;
     return;
   }
   let html = esc(a.text);
@@ -492,18 +287,18 @@ function render(a, c) {
     const eq = esc(q.quote);
     html = html.split(eq).join(`<mark class="${q.verified ? "" : "bad"}" title="${q.verified ? "Found word-for-word in passage " + q.passage : "Not found in the letters"}">${eq}</mark>`);
   }
-  html = html.replace(/\[(\d{1,2})\]/g, (_, n) => `<button class="cite" data-n="${n}" aria-label="Go to passage ${n}">${n}</button>`);
+  // [3] and [1, 4] both become chips.
+  html = html.replace(/\[(\d{1,2}(?:\s*,\s*\d{1,2})*)\]/g, (_, ns) => ns.split(/\s*,\s*/).map(citeChip).join(""));
   const ok = a.quotes.filter(q => q.verified).length, bad = a.quotes.length - ok;
   $("#out").innerHTML = `
-    <div class="answer ${state.mode}">
-      <div class="who">${state.mode === "seance" ? "✦" : "✎"} ${who}</div>
+    <article class="answer ${state.mode}">
+      <header>${who}</header>
       <p lang="${state.lang}" dir="auto">${html}</p>
-      <div class="checks"></div>
-    </div>`;
+      ${a.quotes.length ? `<footer>
+        <span class="badge ok">✓ ${ok} quote${ok === 1 ? "" : "s"} found word-for-word</span>
+        ${bad ? `<span class="badge bad">⚠ ${bad} not found in the letters</span>` : ""}</footer>` : ""}
+    </article>`;
   const done = inkIn($("#out .answer p"));
-  $("#out .checks").innerHTML = a.quotes.length
-    ? `<span class="badge ok" style="--done:${done}ms">✓ ${ok} quote${ok === 1 ? "" : "s"} found word-for-word</span>`
-      + (bad ? `<span class="badge bad" style="--done:${done + 120}ms">⚠ ${bad} not found in the letters</span>` : "") : "";
   $("#out").insertAdjacentHTML("beforeend", passagesHtml(a, done));
 }
 
@@ -511,19 +306,19 @@ function passagesHtml(a, done) {
   if (!a.passages.length) return "";
   const cited = new Set(a.cited);
   return `<div class="ph"><h2>From the letters</h2><span>${a.passages.length} passage${a.passages.length === 1 ? "" : "s"}${cited.size ? ` · ${cited.size} cited` : ""}</span></div>
-    <div class="passages" style="--done:${Math.min(done, 900)}ms">${a.passages.map((p, i) => {
+    ${a.passages.map((p, i) => {
       const lang = SCRIPT_LANG[p.script] || p.lang;
-      return `<article class="p ${p.image ? "has-img" : ""} ${cited.size && !cited.has(p.n) ? "uncited" : ""}" id="p${p.n}" style="--i:${i}">
+      return `<article class="p ${cited.size && !cited.has(p.n) ? "uncited" : ""}" id="p${p.n}" style="--i:${i};--done:${Math.min(done, 900)}ms">
         <div>
           <div class="meta"><span class="n">${p.n}</span><span class="tl">${esc(p.title)}</span><span>p. ${p.page}</span>
             ${p.year ? `<span>${esc(p.year)}</span>` : ""}<span class="lang">${LANG[lang] || esc(lang)}</span>
             ${p.source_url ? `<a href="${esc(p.source_url)}" target="_blank" rel="noopener">source ↗</a>` : ""}</div>
           <div class="text" lang="${esc(lang)}" dir="auto">${esc(p.text)}</div>
-          <button class="more" hidden>Read the whole passage</button>
+          <button type="button" class="more secondary outline" hidden>Read the whole passage</button>
         </div>
-        ${p.image ? `<button class="scan" style="--r:${(i % 2 ? -1 : 1) * (1.5 + (i % 3) * .6)}deg" aria-label="Open scan of page ${p.page}"><img src="/pages/${esc(p.image)}" alt="Scan of page ${p.page}" loading="lazy"></button>` : ""}
+        ${p.image ? `<button type="button" class="scan" aria-label="Open scan of page ${p.page}"><img src="/pages/${esc(p.image)}" alt="Scan of page ${p.page}" loading="lazy"></button>` : ""}
       </article>`;
-    }).join("")}</div>`;
+    }).join("")}`;
 }
 
 // Show "read more" only where the text is actually clipped.
@@ -554,12 +349,8 @@ $("#out").addEventListener("click", e => {
 
 function openScan(img) {
   const big = $("#zoom img");
-  const show = () => { img.style.viewTransitionName = ""; big.src = img.src; big.alt = img.alt; big.style.viewTransitionName = "scan"; $("#zoom").showModal(); };
-  if (document.startViewTransition && !calm) {
-    img.style.viewTransitionName = "scan";
-    $("#zoom img").style.animation = "none";
-    document.startViewTransition(show).finished.finally(() => { big.style.viewTransitionName = ""; big.style.animation = ""; });
-  } else show();
+  big.src = img.src; big.alt = img.alt;
+  $("#zoom").showModal();
 }
 $("#zoom").addEventListener("click", () => $("#zoom").close());
 init();

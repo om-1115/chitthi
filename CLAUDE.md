@@ -34,7 +34,8 @@ Models (env, see `.env.example`): `CHAT_MODEL` / `VISION_MODEL` = `gemma4:e4b`, 
 - `chitthi/retrieve.py`: FTS5 + vector results fused with RRF (k=60).
 - `chitthi/answer.py`: prompts (archivist / séance) + `check()`, which drops citations that point at
   passages that don't exist and verifies each quoted span verbatim against the cited passages.
-- `chitthi/api.py`: FastAPI; `web/index.html` is a single-file UI (no build step).
+- `chitthi/api.py`: FastAPI; `web/index.html` is a single-file UI (no build step) on Pico CSS 2,
+  vendored at `web/vendor/pico.red.min.css` and served from `/static`. Light mode only.
 
 ## Rules for this project
 
