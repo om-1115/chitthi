@@ -9,6 +9,9 @@ No cloud, no API keys: Gemma runs locally through Ollama.
 
 Built for the DEV Hacktoberfest 2026 "Ghost in the Machine" challenge.
 
+**Demo:** [docs/chitthi-demo.mp4](docs/chitthi-demo.mp4) (99 s): a séance answer in English, the same
+letters in Hindi, and how the quote check works. Recorded from the app running against local Gemma 4.
+
 ## How it works
 
 ```
