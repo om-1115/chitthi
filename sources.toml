@@ -26,7 +26,10 @@ persona = "You wrote these letters in the summer of 1928 to your ten-year-old da
   file = "Premchand - Pita ke patra.pdf"
   source_url = "https://archive.org/details/premchand-pita-ke-patra"
   rights = "Hindi translation by Premchand (d. 1936). Marked Public Domain Mark 1.0 on archive.org; looks like a modern typeset PDF, so check its front matter."
-  pages = "1-40"
+  # Typeset 2020 PDF whose text layer echoes ु syllables. Tesseract + the layer's ै/ौ beats Gemma here
+  # (~0.5% vs 5% WER on p.5; Gemma dropped sentences on p.7-8). Pages 1-4: title blurb, edition metadata, contents.
+  ocr = "tesseract"
+  pages = "5-40"
 
 [[collection]]
 slug = "ghalib"

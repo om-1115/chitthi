@@ -9,7 +9,9 @@ Strategy per page (``mode="auto"``):
 
 from __future__ import annotations
 
+import difflib
 import io
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator
@@ -25,6 +27,19 @@ LANG_SCRIPT = {"hi": "deva", "mr": "deva", "ne": "deva", "ur": "arab", "fa": "ar
 LANG_NAME = {"hi": "Hindi (Devanagari)", "ur": "Urdu (Nastaliq/Arabic script)", "en": "English"}
 TESS_LANG = {"hi": "hin", "ur": "urd", "en": "eng"}
 
+# Some PDF producers break Devanagari extraction: a syllable with ु/ू is emitted twice
+# ("पुस्पुतक" for पुस्तक, "दुनिदु या" for दुनिया). The script is right, so script_quality()
+# can't see it; count these echoes instead. Reduplication like कुछ-कुछ is excluded by the hyphen.
+DEVA_ECHO = re.compile(r"([क-ह]़?[ुू]ं?)[^\s\-।]{0,3}\s?\1")
+DEVA_WORD = re.compile(r"[\u0900-\u097F]+")
+
+# Tesseract's hin model misses the second stroke of ै/ौ/ऐ/औ (है→हे, कैसे→केसे, और→ओर). A broken
+# text layer still spells those right, so fix_matras() takes the layer's spelling wherever the two
+# agree word for word up to that stroke. Such layers also drop the space after ं ("बातेंपूछा").
+MATRA_FOLD = str.maketrans({"ै": "े", "ौ": "ो", "ऐ": "ए", "औ": "ओ"})
+DEVA_JOINED = re.compile(r"(?<=[ंँ])(?=[ऄ-ह])")
+TOKEN = re.compile(r"\S+")
+
 TRANSCRIBE_PROMPT = """You are transcribing one page of an old scanned book or letter.
 Expected language: {lang}.
 Rules:
@@ -39,7 +54,7 @@ class Page:
     number: int  # 1-based
     text: str
     image_png: bytes | None
-    method: str  # "text-layer" | "gemma" | "tesseract" | "plain"
+    method: str  # "text-layer" | "gemma" | "tesseract" | "tesseract+layer" | "plain"
 
 
 def detect_script(text: str) -> str:
@@ -63,6 +78,35 @@ def script_quality(text: str, lang: str) -> float:
     ranges = SCRIPT_RANGES[want]
     ok = sum(1 for c in letters if any(a <= ord(c) <= b for a, b in ranges))
     return ok / len(letters)
+
+
+def echo_rate(text: str) -> float:
+    """Duplicated-syllable artifacts per Devanagari word (clean text: ~0, broken layers: 0.03+)."""
+    words = len(DEVA_WORD.findall(text))
+    return len(DEVA_ECHO.findall(text)) / words if words else 0.0
+
+
+def layer_ok(text: str, lang: str, min_quality: float = 0.8, max_echo: float = 0.02) -> bool:
+    if script_quality(text, lang) < min_quality:
+        return False
+    return LANG_SCRIPT.get(lang) != "deva" or echo_rate(text) < max_echo
+
+
+def fix_matras(ocr: str, layer: str) -> str:
+    """Restore ै/ौ in OCR text from a (possibly garbled) text layer of the same page."""
+    toks = [(m.start(), m.end(), m.group()) for m in TOKEN.finditer(ocr)]
+    ref = TOKEN.findall(DEVA_JOINED.sub(" ", layer))
+    sm = difflib.SequenceMatcher(
+        None, [t.translate(MATRA_FOLD) for *_, t in toks], [w.translate(MATRA_FOLD) for w in ref], autojunk=False
+    )
+    out, pos = [], 0
+    for a, b, size in sm.get_matching_blocks():
+        for k in range(size):
+            start, end, word = toks[a + k]
+            if ref[b + k] != word:
+                out.append(ocr[pos:start] + ref[b + k])
+                pos = end
+    return "".join(out) + ocr[pos:]
 
 
 def _parse_range(spec: str | None, n: int) -> list[int]:
@@ -137,10 +181,14 @@ def read_pages(
         img.save(buf, format="PNG")
         png = buf.getvalue()
 
-        if mode == "text" or (mode == "auto" and script_quality(layer, lang) >= min_quality):
+        if mode == "text" or (mode == "auto" and layer_ok(layer, lang, min_quality)):
             yield Page(num, layer, png, "text-layer")
         elif mode == "tesseract":
-            yield Page(num, _tesseract(png, lang) or "", png, "tesseract")
+            text = _tesseract(png, lang) or ""
+            if LANG_SCRIPT.get(lang) == "deva" and script_quality(layer, lang) >= min_quality:
+                yield Page(num, fix_matras(text, layer), png, "tesseract+layer")
+            else:
+                yield Page(num, text, png, "tesseract")
         else:
             text, method = transcribe(llm, png, lang)
             yield Page(num, text, png, method)

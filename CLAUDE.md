@@ -23,8 +23,11 @@ Models (env, see `.env.example`): `CHAT_MODEL` / `VISION_MODEL` = `gemma4:e4b`, 
 
 ## Architecture
 
-- `chitthi/ocr.py`: per page, use the PDF text layer if `script_quality()` passes for the expected
-  language, else Gemma vision transcription, else Tesseract.
+- `chitthi/ocr.py`: per page, use the PDF text layer if `layer_ok()` passes (right script, and for
+  Devanagari no echoed ु syllables via `echo_rate()`), else Gemma vision transcription, else Tesseract.
+  `ocr = "tesseract"` on a Devanagari doc with a broken layer runs `fix_matras()`: Tesseract text with
+  the layer's ै/ौ restored (method `tesseract+layer`). The Hindi Nehru PDF uses this (Gemma paraphrased
+  and dropped sentences there).
 - `chitthi/chunk.py`: passages of ≤900 chars, never crossing pages (citations are per page).
 - `chitthi/store.py`: SQLite, FTS5 (`unicode61 remove_diacritics 0`) + float32 embeddings in a BLOB;
   brute-force cosine in numpy (the corpus is small).
@@ -45,6 +48,8 @@ Models (env, see `.env.example`): `CHAT_MODEL` / `VISION_MODEL` = `gemma4:e4b`, 
 
 ## Status (27 Oct)
 
-Scaffold done, and 7 tests pass with FakeLLM. **Not yet run against real Ollama/Gemma or live archive.org.**
-Next: run the full pipeline on Nehru (English + Hindi), compare OCR methods on Hindi pages, test Urdu
-OCR on Ghalib, and decide by Wed night whether Urdu stays in.
+Nehru pages 1-10 (English + Hindi) ingested against real Ollama (`gemma4:e4b`, `embeddinggemma`);
+cited answers with verified quotes work in both languages. Hindi OCR compared on p.1-10: Tesseract +
+layer ≈ 0.5% WER on p.5 vs Gemma 5% and the raw layer 24%. Gemma takes ~15-60 s/page on a 16 GB M4.
+`pytesseract` + the `tesseract` binary (with `hin`/`urd`) are now required for Hindi.
+Next: test Urdu OCR on Ghalib and decide by Wed night whether Urdu stays in.

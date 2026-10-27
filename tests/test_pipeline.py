@@ -12,7 +12,7 @@ from chitthi.chunk import split_pages
 from chitthi.config import Settings
 from chitthi.ingest import ingest_file
 from chitthi.llm import FakeLLM
-from chitthi.ocr import detect_script, script_quality
+from chitthi.ocr import detect_script, echo_rate, fix_matras, layer_ok, script_quality
 from chitthi.retrieve import search
 from chitthi.store import Store
 
@@ -45,6 +45,24 @@ def test_scripts():
     assert detect_script("My dear") == "latn"
     assert script_quality("ab" * 30, "hi") == 0.0
     assert script_quality("नमस्ते " * 20, "hi") > 0.9
+
+
+def test_broken_devanagari_layer_is_rejected():
+    # Shape of the Premchand PDF's text layer: right script, syllables with ु emitted twice.
+    broken = "जब तुम तु मेरे साथ रहती हो तो अकसर मुझमु से बहुतहु-सी बातें पूछा करती हो। " * 3
+    clean = "जब तुम मेरे साथ रहती हो तो अकसर मुझसे बहुत-सी बातें पूछा करती हो। कुछ-कुछ बातें। " * 3
+    assert script_quality(broken, "hi") > 0.9
+    assert echo_rate(clean) == 0.0 and layer_ok(clean, "hi")
+    assert echo_rate(broken) > 0.1 and not layer_ok(broken, "hi")
+
+
+def test_fix_matras_takes_layer_spelling():
+    # Tesseract drops the ै/औ stroke; the garbled layer (echoes, missing spaces) still has it right.
+    ocr = "जब तुम मसूरी में हो ओर में इलाहाबाद में, यह केसे हुआ हे।"
+    layer = "जब तुम तु मसूरी मेंहो और मैंइलाहाबाद में, यह कैसे हुआ है।"
+    assert fix_matras(ocr, layer) == "जब तुम मसूरी में हो और मैं इलाहाबाद में, यह कैसे हुआ है।"
+    # Words that differ by more than that stroke are left alone.
+    assert fix_matras("बहुत थोड़ी बातें", "बहुतहु छोटी बातें") == "बहुत थोड़ी बातें"
 
 
 def test_chunking_keeps_pages():
